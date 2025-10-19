@@ -48,11 +48,11 @@ public class AuthController {
         try {
             // Authenticate using email (not username)
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
             // Check User table first
-            Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+            Optional<User> userOpt = userRepository.findByEmail(request.getUsername());
             if (userOpt.isPresent()) {
                 User user = userOpt.get();
                 String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUserId());
@@ -64,7 +64,7 @@ public class AuthController {
             }
 
             // Check Admin table
-            Optional<Admin> adminOpt = adminRepository.findByEmail(request.getEmail());
+            Optional<Admin> adminOpt = adminRepository.findByEmail(request.getUsername());
             if (adminOpt.isPresent()) {
                 Admin admin = adminOpt.get();
                 String token = jwtUtil.generateToken(admin.getEmail(), admin.getRole(), admin.getId());
@@ -78,7 +78,7 @@ public class AuthController {
             return ResponseEntity.status(404).body("User not found");
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
-            error.put("message", "Invalid credentials");
+            error.put("message", "Invalid credentials: " + e.getMessage());
             return ResponseEntity.status(401).body(error);
         }
     }
@@ -87,10 +87,11 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             Object registeredUser = authService.registerUser(
+                    request.getFirstName(),
+                    request.getLastName(),
                     request.getEmail(),
                     request.getPassword(),
                     request.getRole()
-
             );
 
             Map<String, Object> response = new HashMap<>();
@@ -138,6 +139,8 @@ public class AuthController {
         userMap.put("id", user.getUserId().toString());
         userMap.put("email", user.getEmail());
         userMap.put("role", user.getRole());
+        userMap.put("firstName", user.getFirstName());
+        userMap.put("lastName", user.getLastName());
         return userMap;
     }
 
@@ -151,11 +154,17 @@ public class AuthController {
         return adminMap;
     }
 
-    // Updated LoginRequest class
+    // Updated LoginRequest class to handle both username and email fields
     static class LoginRequest {
+        private String username;
         private String email;
         private String password;
 
+        public String getUsername() {
+            // Return username if set, otherwise return email
+            return username != null ? username : email;
+        }
+        public void setUsername(String username) { this.username = username; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }
@@ -163,10 +172,16 @@ public class AuthController {
     }
 
     static class RegisterRequest {
+        private String firstName;
+        private String lastName;
         private String email;
         private String password;
         private String role;
 
+        public String getFirstName() { return firstName; }
+        public void setFirstName(String firstName) { this.firstName = firstName; }
+        public String getLastName() { return lastName; }
+        public void setLastName(String lastName) { this.lastName = lastName; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public String getPassword() { return password; }

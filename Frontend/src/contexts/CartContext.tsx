@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import { useNotification } from './NotificationContext'
+import toast from 'react-hot-toast'
 
 export interface CartItem {
   id: string
@@ -111,7 +111,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     total: 0,
     itemCount: 0
   })
-  const { showSuccess } = useNotification()
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cart')
@@ -131,12 +130,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addItem = (item: Omit<CartItem, 'quantity'>) => {
     dispatch({ type: 'ADD_ITEM', payload: item })
-    showSuccess('Item added to cart!')
+    toast.success('Item added to cart!')
   }
 
   const removeItem = (id: string) => {
     dispatch({ type: 'REMOVE_ITEM', payload: id })
-    showSuccess('Item removed from cart!')
+    toast.success('Item removed from cart!')
   }
 
   const updateQuantity = (id: string, quantity: number) => {
@@ -145,7 +144,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' })
-    showSuccess('Cart cleared!')
+    toast.success('Cart cleared!')
   }
 
   const value = {

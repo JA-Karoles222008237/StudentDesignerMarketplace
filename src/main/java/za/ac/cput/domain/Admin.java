@@ -5,12 +5,12 @@
 
 package za.ac.cput.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 
-import java.util.Locale;
 import java.util.Objects;
 
 @Entity
@@ -20,13 +20,8 @@ public class Admin {
     private Long id;
     private String firstName;
     private String lastName;
-    @Email
-    @Column(nullable = false, unique = true, length = 191)
     private String email;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Column(nullable = false)
     private String password;
-    @Column(nullable = false, length = 32)
     private String role = "ADMIN";
 
     public Admin() {}
@@ -35,9 +30,9 @@ public class Admin {
         this.id = builder.id;
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
-        this.email = normalizeEmail(builder.email);
+        this.email = builder.email;
         this.password = builder.password;
-        this.role = normalizeRole(builder.role);
+        this.role = builder.role;
     }
 
     // Getters
@@ -66,21 +61,6 @@ public class Admin {
         return role;
     }
 
-    @PrePersist
-    @PreUpdate
-    void onPersistOrUpdate() {
-        this.email = normalizeEmail(this.email);
-        this.role = normalizeRole(this.role);
-    }
-
-    private String normalizeEmail(String value) {
-        return value == null ? null : value.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private String normalizeRole(String value) {
-        return value == null ? null : value.trim().toUpperCase(Locale.ROOT);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -100,6 +80,7 @@ public class Admin {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
                 '}';
     }

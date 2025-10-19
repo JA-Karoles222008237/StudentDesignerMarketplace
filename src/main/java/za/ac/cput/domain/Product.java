@@ -2,30 +2,40 @@ package za.ac.cput.domain;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
+import jakarta.persistence.*;
 
 /**
  * Product entity for Student Designer Marketplace.
  */
 @Entity
+@Table(name = "product")
 public class Product {
     @Id
     private String productID;
+
+    @Column(length = 500)
     private String name;
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private double price;
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
+
+    @Column(length = 100)
     private String category;
+
     private boolean inStock;
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     private String sizes; // Stored as comma-separated string
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     private String colors; // Stored as comma-separated string
-    @Lob
+
+    @Column(columnDefinition = "TEXT")
     private String features; // Stored as comma-separated string
 
     protected Product(){}

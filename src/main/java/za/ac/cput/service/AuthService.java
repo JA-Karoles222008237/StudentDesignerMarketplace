@@ -1,13 +1,13 @@
 package za.ac.cput.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import za.ac.cput.domain.Admin;
-import za.ac.cput.domain.User;
 import za.ac.cput.domain.UType.Customer;
 import za.ac.cput.domain.UType.Designer;
 import za.ac.cput.repository.AdminRepository;
 import za.ac.cput.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
@@ -22,7 +22,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Object registerUser(String email, String password, String role) {
+    public Object registerUser(String firstName, String lastName, String email, String password, String role) {
         // Check if email already exists in either table
         if (userRepository.findByEmail(email).isPresent() || adminRepository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
@@ -34,6 +34,8 @@ public class AuthService {
         switch (role.toUpperCase()) {
             case "CUSTOMER":
                 Customer customer = new Customer.Builder()
+                        .setFirstName(firstName)
+                        .setLastName(lastName)
                         .setEmail(email)
                         .setPassword(encryptedPassword)
                         .setRole("CUSTOMER")
@@ -44,6 +46,8 @@ public class AuthService {
 
             case "DESIGNER":
                 Designer designer = new Designer.Builder()
+                        .setFirstName(firstName)
+                        .setLastName(lastName)
                         .setEmail(email)
                         .setPassword(encryptedPassword)
                         .setRole("DESIGNER")
@@ -53,11 +57,11 @@ public class AuthService {
 
             case "ADMIN":
                 Admin admin = new Admin.Builder()
+                        .setFirstName(firstName)
+                        .setLastName(lastName)
                         .setEmail(email)
                         .setPassword(encryptedPassword)
                         .setRole("ADMIN")
-                        .setFirstName("") // Default empty
-                        .setLastName("") // Default empty
                         .build();
                 return adminRepository.save(admin);
 

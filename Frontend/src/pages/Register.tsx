@@ -1,8 +1,8 @@
+import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNotification } from '../contexts/NotificationContext';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -17,9 +17,8 @@ const Register: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const { register, loading } = useAuth();
   const navigate = useNavigate();
-    const { showError } = useNotification();
 
-    const validateForm = () => {
+  const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.firstName) newErrors.firstName = 'First name is required';
@@ -60,13 +59,12 @@ const Register: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      const success = await register(fullName, formData.email, formData.password);
+      const success = await register(formData.firstName, formData.lastName, formData.email, formData.password);
       if (success) {
         navigate('/'); // redirect after registration
       }
     } catch (error) {
-        showError('Registration failed. Please try again.');
+      toast.error('Registration failed. Please try again.');
     }
   };
 

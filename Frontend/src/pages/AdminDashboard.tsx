@@ -19,13 +19,13 @@ import {
     X
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Admin, deleteAdmin, getAllAdmins, registerAdmin, updateAdmin } from '../api/adminService';
 import { getAllOrders } from '../api/orderService';
 import { createProduct, deleteProduct, getAllProducts, updateProduct } from '../api/productService';
 import { getAllCustomers } from '../api/profileApi';
 import { useAuth } from '../contexts/AuthContext';
-import { useNotification } from '../contexts/NotificationContext';
 import { categories, Product } from '../data/products';
 
 interface DashboardStats {
@@ -51,7 +51,6 @@ interface Customer {
 
 const AdminDashboard: React.FC = () => {
     const { currentUser, logout, role } = useAuth();
-    const { showError, showSuccess } = useNotification();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'overview' | 'customers' | 'products' | 'orders' | 'admins'>('overview');
     const [viewMode, setViewMode] = useState<'list' | 'view' | 'edit' | 'create'>('list');
@@ -70,22 +69,36 @@ const AdminDashboard: React.FC = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (currentUser && role !== 'admin') {
+            // Protect the dashboard: role check uses uppercase 'ADMIN'
+            if (currentUser && role !== 'ADMIN') {
             navigate('/');
         } else if (!currentUser) {
             navigate('/login?role=admin');
         }
-        if (currentUser && role === 'admin') {
+            if (currentUser && role === 'ADMIN') {
             const loadDashboardData = async () => {
                 try {
                     setLoading(true);
+                    console.log('Starting to load dashboard data...');
+                    console.log('Current user:', currentUser);
+                    console.log('Current role:', role);
+                    console.log('Auth token:', localStorage.getItem('authToken'));
+                    
                     // Fetch all customers
+                    console.log('Fetching customers...');
                     const fetchedCustomers = await getAllCustomers();
+                    console.log('Customers fetched:', fetchedCustomers.length);
+                    
                     // Fetch all products
+                    console.log('Fetching products...');
                     const fetchedProducts = await getAllProducts();
+                    console.log('Products fetched:', fetchedProducts.length);
                     setProducts(fetchedProducts);
+                    
                     // Fetch all orders
+                    console.log('Fetching orders...');
                     const fetchedOrders = await getAllOrders();
+                    console.log('Orders fetched:', fetchedOrders.length);
                     setOrders(fetchedOrders);
                     
                     // Enhance customers with payment method information from their order history
@@ -128,8 +141,12 @@ const AdminDashboard: React.FC = () => {
                     
                     // Calculate total revenue from orders
                     const totalRevenue = fetchedOrders.reduce((sum: number, order: any) => sum + (order.total || 0), 0);
+                    console.log('Total revenue calculated:', totalRevenue);
+                    
                     // Fetch all admins
+                    console.log('Fetching admins...');
                     const fetchedAdmins = await getAllAdmins();
+                    console.log('Admins fetched:', fetchedAdmins.length);
                     setAdmins(fetchedAdmins);
                     // Set stats from real data
                     setStats({
@@ -138,9 +155,11 @@ const AdminDashboard: React.FC = () => {
                         totalOrders: fetchedOrders.length,
                         totalRevenue: totalRevenue
                     });
-                } catch (error) {
+                } catch (error: any) {
                     console.error('Error loading dashboard data:', error);
-                    showError('Failed to load dashboard data');
+                    const errorMessage = error?.response?.data?.message || error?.message || 'Failed to load dashboard data';
+                    console.error('Detailed error:', errorMessage, error?.response?.status);
+                    toast.error(`Failed to load dashboard data: ${errorMessage}`);
                 } finally {
                     setLoading(false);
                 }
@@ -188,10 +207,10 @@ const AdminDashboard: React.FC = () => {
                     : order
             );
             setOrders(updatedOrders);
-            showSuccess(`Order status updated to ${newStatus}`);
+            toast.success(`Order status updated to ${newStatus}`);
         } catch (error) {
             console.error('Error updating order status:', error);
-            showError('Failed to update order status');
+            toast.error('Failed to update order status');
         }
     };
 
@@ -204,9 +223,9 @@ const AdminDashboard: React.FC = () => {
                 await deleteAdmin(item.id);
                 setAdmins(admins.filter(a => a.id !== item.id));
             }
-            showSuccess('Deleted successfully!');
+            toast.success('Deleted successfully!');
         } catch (error) {
-            showError('Failed to delete');
+            toast.error('Failed to delete');
         }
     };
 
@@ -217,7 +236,7 @@ const AdminDashboard: React.FC = () => {
         }).format(amount);
     };
 
-    if (!currentUser || role !== 'admin') {
+    if (!currentUser || role !== 'ADMIN') {
         return (
             <div style={{
                 display: 'flex',
@@ -791,16 +810,16 @@ const AdminDashboard: React.FC = () => {
                 if (viewMode === 'create') {
                     const created = await createProduct(formData);
                     setProducts([...products, created]);
-                    showSuccess('Product created successfully!');
+                    toast.success('Product created successfully!');
                 } else {
                     const updated = await updateProduct({ ...formData, id: selectedItem.id });
                     setProducts(products.map(p => p.id === updated.id ? updated : p));
-                    showSuccess('Product updated successfully!');
+                    toast.success('Product updated successfully!');
                 }
                 setViewMode('list');
             } catch (err) {
                 console.error('Error saving product:', err);
-                showError('Failed to save product. Check console for details.');
+                toast.error('Failed to save product. Check console for details.');
             }
         };
 
@@ -999,7 +1018,7 @@ const AdminDashboard: React.FC = () => {
                 if (viewMode === 'create') {
                     const newAdmin = await registerAdmin(formData);
                     updatedAdmins = [...admins, newAdmin];
-                    showSuccess('Admin created successfully!');
+                    toast.success('Admin created successfully!');
                 } else {
                     // Explicitly type updateData as Admin
                     const updateData: Admin = { id: selectedItem.id, ...formData };
@@ -1008,14 +1027,14 @@ const AdminDashboard: React.FC = () => {
                     }
                     const updated = await updateAdmin(updateData);
                     updatedAdmins = admins.map(a => a.id === updated.id ? updated : a);
-                    showSuccess('Admin updated successfully!');
+                    toast.success('Admin updated successfully!');
                 }
                 setAdmins(updatedAdmins);
                 setViewMode('list');
                 setSelectedItem(null);
             } catch (err) {
                 console.error('Error saving admin:', err);
-                showError('Failed to save admin. Check console for details.');
+                toast.error('Failed to save admin. Check console for details.');
             }
         };
 

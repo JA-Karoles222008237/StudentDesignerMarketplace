@@ -13,7 +13,7 @@ public class DesignerFactory {
                 .setLastName(lastName)
                 .setEmail(email)
                 .setPassword(password)
-                .setRole("DESIGNER") // Default role
+                .setRole("designer") // Default role
                 .setPortfolioURL(portfolioURL)
                 .build();
     }

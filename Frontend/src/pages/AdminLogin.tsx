@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -13,7 +13,8 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password, 'admin');
+      // AuthContext.login now only accepts email and password. Backend will return role.
+      await login(email, password);
       // Navigation will be handled by useEffect below
     } catch (err: any) {
       setError(err?.message || 'Invalid admin credentials');
@@ -21,7 +22,8 @@ const AdminLogin: React.FC = () => {
   };
 
   useEffect(() => {
-    if (role === 'admin') {
+    // role is provided by AuthContext and uses uppercase values
+    if (role === 'ADMIN') {
       navigate('/admin/dashboard'); // Adjust route as needed
     }
   }, [role, navigate]);

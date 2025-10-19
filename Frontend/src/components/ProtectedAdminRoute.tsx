@@ -23,7 +23,7 @@ const ProtectedAdminRoute: React.FC<ProtectedAdminRouteProps> = ({ children }) =
     );
   }
 
-  if (!currentUser || role !== 'admin') {
+  if (!currentUser || role !== 'ADMIN') {
     return <Navigate to="/login?role=admin" replace />;
   }
 

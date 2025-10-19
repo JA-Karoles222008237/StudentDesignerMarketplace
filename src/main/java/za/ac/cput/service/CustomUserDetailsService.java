@@ -1,17 +1,18 @@
 package za.ac.cput.service;
 
-import za.ac.cput.domain.Admin;
-import za.ac.cput.domain.User;
-import za.ac.cput.repository.AdminRepository;
-import za.ac.cput.repository.UserRepository;
+import java.util.Collections;
+import java.util.Optional;
+
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Optional;
+import za.ac.cput.domain.Admin;
+import za.ac.cput.domain.User;
+import za.ac.cput.repository.AdminRepository;
+import za.ac.cput.repository.UserRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -33,7 +34,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             return new org.springframework.security.core.userdetails.User(
                     user.getEmail(),
                     user.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+                    Collections.singletonList(new SimpleGrantedAuthority(user.getRole()))
             );
         }
 
@@ -44,7 +45,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             return new org.springframework.security.core.userdetails.User(
                     admin.getEmail(),
                     admin.getPassword(),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + admin.getRole()))
+                    Collections.singletonList(new SimpleGrantedAuthority(admin.getRole()))
             );
         }
 

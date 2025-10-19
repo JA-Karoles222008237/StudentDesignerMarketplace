@@ -13,7 +13,7 @@ public class CustomerFactory {
                 .setLastName(lastName)
                 .setEmail(email)
                 .setPassword(password)
-                .setRole("CUSTOMER") // Default role
+                .setRole("customer") // Default role
                 .setPaymentMethod(paymentMethod)
                 .setAmount(amount)
                 .build();

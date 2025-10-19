@@ -1,16 +1,15 @@
 import { CreditCard, User } from 'lucide-react'
 import React, { useState } from 'react'
+import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { createOrder } from '../api/orderService'
 import { useAuth } from '../contexts/AuthContext'
 import { useCart } from '../contexts/CartContext'
-import { useNotification } from '../contexts/NotificationContext'
 
 const Checkout: React.FC = () => {
   const { items, total, clearCart } = useCart()
   const { currentUser } = useAuth()
   const navigate = useNavigate()
-  const { showError, showSuccess } = useNotification()
 
   const [formData, setFormData] = useState({
     // Billing Information
@@ -49,7 +48,7 @@ const Checkout: React.FC = () => {
       if (!currentUser) throw new Error('User not logged in')
       // Only allow single-item checkout for backend compatibility
       if (items.length !== 1) {
-        showError('You can only checkout one item at a time. Please remove extra items from your cart.');
+        toast.error('You can only checkout one item at a time. Please remove extra items from your cart.');
         setLoading(false);
         return;
       }
@@ -73,10 +72,9 @@ const Checkout: React.FC = () => {
         toast.success('Order placed successfully!');
       }
       
-      showSuccess('Order placed successfully!');
       navigate('/profile');
     } catch (error) {
-      showError('Failed to process payment. Please try again.')
+      toast.error('Failed to process payment. Please try again.')
     } finally {
       setLoading(false)
     }
